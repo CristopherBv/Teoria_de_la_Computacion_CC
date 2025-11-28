@@ -1,0 +1,19 @@
+PROGRAMA factorial
+# VarFac acumula los productos por iteración
+
+VarFac = 0x1
+# VarCon contiene el iterador del factor
+VarCon = 0x0
+IMPRIME "Cálculo del Factorial"
+IMPRIME "Número?"
+LEE Num
+# Aplica Num! = 1 * 2 * 3 * … * Num
+MIENTRAS VarCon <= Num HACER
+VarCon = VarCon + 0x1
+VarFac = VarFac * VarCon
+FINM
+IMPRIME "Factorial de "
+IMPRIME Num
+IMPRIME " es "
+IMPRIME VarFac
+FINPROG
