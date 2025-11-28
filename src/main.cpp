@@ -77,6 +77,12 @@ int main(int argc, char *argv[]) {
                     tokens.push_back({KEYWORDS, word, lineNumber});
                 }else if (isNumeric(word)) {
                     tokens.push_back({CONSTANTS, word, lineNumber});
+                }else if(word == "+" || word == "-" || word == "*" || word == "/") {
+                    tokens.push_back({AR_OP, word});
+                }else if(word == ">" || word == "<" || word == "<>" || word == ">=" || word == "<=" || word == "==" || word == "!="){
+                    tokens.push_back({REL_OP, word});
+                }else if(word == "=") {
+                    tokens.push_back({ASIGNMENT, word});
                 }else if (isalpha(word[0])){
                     tokens.push_back({IDENTIFIER, word, lineNumber});
                 }
