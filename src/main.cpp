@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <map>
 using namespace std;
 
 enum TokenType {
@@ -22,6 +23,12 @@ typedef struct{
     int line;
 
 }TokenStruct;
+int hexToInt(string hex) {
+    string hex_str = hex.substr(2);
+    return stoi(hex_str, nullptr, 16);
+}
+
+
 
 bool isNumeric(const std::string& str) {
     //hexadecimal numbers
@@ -31,10 +38,24 @@ bool isNumeric(const std::string& str) {
                 return false;
             }
         }
+
         return true;
     }
     return false;
 }
+
+string to_string(TokenStruct type) {
+    switch (type.type) {
+        case KEYWORDS: return "KEYWORDS";
+        case IDENTIFIER: return "IDENTIFIER";
+        case CONSTANTS: return "CONSTANTS";
+        case STRING_LITERAL: return "STRING_LITERAL";
+        case AR_OP: return "AR_OP";
+        case REL_OP: return "REL_OP";
+        case ASIGNMENT: return "ASIGNMENT";
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -46,10 +67,13 @@ int main(int argc, char *argv[]) {
         cerr << "couldn't open file" << argv[1] << endl;
         return EXIT_FAILURE;
     }
-
+    map<string, int> identifiers;
+    map<string, int> const_values;
+    map<string, int> string_literals;
+    vector<string> identifiers_list, const_values_list, string_literals_list;
     vector<TokenStruct> tokens;
-    string line, word, text;
-    int lineNumber = 1;
+    string line, word;
+    int lineNumber = 1, id = 0, txt = 0;
     bool inString = false;
     while (getline(inputFile, line)) {
         line += " ";
@@ -64,9 +88,11 @@ int main(int argc, char *argv[]) {
             if (c == '"') {
                 inString = !inString;
                 if (!inString) {
-                    text += word;
-                    tokens.push_back({STRING_LITERAL, text.substr(1, text.size() - 2), lineNumber});
-                    text = "";
+                    string_literals_list.push_back(word);
+                    string_literals.insert({word, ++txt});
+                    tokens.push_back({STRING_LITERAL, word, lineNumber});
+                    word = "";
+                    break;
                 }
             }
 
@@ -76,29 +102,60 @@ int main(int argc, char *argv[]) {
                     || word == "HACER") {
                     tokens.push_back({KEYWORDS, word, lineNumber});
                 }else if (isNumeric(word)) {
+                    if (!const_values.contains(word)) {
+                        const_values_list.push_back(word);
+                    }
+                    const_values.insert({word, hexToInt(word)});
                     tokens.push_back({CONSTANTS, word, lineNumber});
                 }else if(word == "+" || word == "-" || word == "*" || word == "/") {
-                    tokens.push_back({AR_OP, word});
+                    tokens.push_back({AR_OP, word, lineNumber});
                 }else if(word == ">" || word == "<" || word == "<>" || word == ">=" || word == "<=" || word == "==" || word == "!="){
-                    tokens.push_back({REL_OP, word});
+                    tokens.push_back({REL_OP, word, lineNumber});
                 }else if(word == "=") {
-                    tokens.push_back({ASIGNMENT, word});
+                    tokens.push_back({ASIGNMENT, word, lineNumber});
                 }else if (isalpha(word[0])){
+                    bool isIdentifier = true;
+                    for (const char idC : word) {
+                        isIdentifier = isIdentifier && isalnum(idC);
+                        if (!isIdentifier) {
+                            cerr << "invalid token: \"" << word << "\" in line: "<< lineNumber <<endl;
+                            return EXIT_FAILURE;
+                        }
+                    }
+                    if (!identifiers.contains(word)) {
+                        identifiers_list.push_back(word);
+                    }
+                    identifiers.insert({word, ++id});
                     tokens.push_back({IDENTIFIER, word, lineNumber});
+                }else {
+                    cerr << "invalid token: \"" << word <<"\" in line: "<< lineNumber << endl;
+                    return EXIT_FAILURE;
                 }
                 word = "";
             }
         }
         if (inString) {
-            cerr << "missing closing quote" << endl;
+            cerr << "missing closing quote" << " in line :" << lineNumber << endl;
             return EXIT_FAILURE;
         }
         word = "";
         lineNumber++;
     }
-    for (const TokenStruct token: tokens) {
-        cout << token.type << ' ' << left << setw(30) << token.value << "line: " << right << setw(3) << token.line <<
+    for (const TokenStruct& token: tokens) {
+        cout << to_string(token) << ": " << left << setw(30) << token.value << "line: " << right << setw(3) << token.line <<
                 endl;
+    }
+    cout << endl <<"IDS" <<endl;
+    for (const string& k: identifiers_list) {
+        cout << k << ",ID" << setw(2) << setfill('0') << identifiers.at(k)<< endl;
+    }
+    cout << endl <<"TXT" <<endl;
+    for (const string& k: string_literals_list) {
+        cout << k << ",TXT" << setw(2)<< setfill('0')<< string_literals.at(k)<< endl;
+    }
+    cout << endl <<"VAL" <<endl;
+    for (const string& k: const_values_list) {
+        cout << k << ": " << const_values.at(k) << endl;
     }
     return (EXIT_SUCCESS);
 }

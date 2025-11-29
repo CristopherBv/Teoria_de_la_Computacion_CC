@@ -1,6 +1,5 @@
 PROGRAMA factorial
 # VarFac acumula los productos por iteración
-
 VarFac = 0x1
 # VarCon contiene el iterador del factor
 VarCon = 0x0
