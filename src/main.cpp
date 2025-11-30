@@ -54,6 +54,7 @@ string to_string(TokenStruct type) {
         case REL_OP: return "REL_OP";
         case ASIGNMENT: return "ASIGNMENT";
     }
+    return "UNKNOWN";
 }
 
 
