@@ -23,8 +23,8 @@ typedef struct{
     int line;
 
 }TokenStruct;
-int hexToInt(string hex) {
-    string hex_str = hex.substr(2);
+int hexToInt(const string& hex) {
+    const string hex_str = hex.substr(2);
     return stoi(hex_str, nullptr, 16);
 }
 
@@ -44,7 +44,7 @@ bool isNumeric(const std::string& str) {
     return false;
 }
 
-string to_string(TokenStruct type) {
+string to_string(const TokenStruct& type) {
     switch (type.type) {
         case KEYWORDS: return "KEYWORDS";
         case IDENTIFIER: return "IDENTIFIER";
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
                     || word == "HACER") {
                     tokens.push_back({KEYWORDS, word, lineNumber});
                 }else if (isNumeric(word)) {
-                    if (!const_values.contains(word)) {
+                    if (const_values.find(word) == const_values.end()) {
                         const_values_list.push_back(word);
                     }
                     const_values.insert({word, hexToInt(word)});
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
                             return EXIT_FAILURE;
                         }
                     }
-                    if (!identifiers.contains(word)) {
+                    if (identifiers.find(word) == identifiers.end()) {
                         identifiers_list.push_back(word);
                     }
                     identifiers.insert({word, ++id});
